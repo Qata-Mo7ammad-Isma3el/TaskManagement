@@ -1,4 +1,5 @@
-﻿using TaskManagement.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using TaskManagement.Data;
 using TaskManagement.Models;
 
 namespace TaskManagement.Services
@@ -28,6 +29,11 @@ namespace TaskManagement.Services
             return _context.Customers.FirstOrDefault(c => c.Email == email);
         }
 
+        public Customer GetCustomerByEmailNoTracking(string email)
+        {
+            return _context.Customers.AsNoTracking().FirstOrDefault(c => c.Email == email);
+        }
+
         public List<Customer> GetAllCustomers()
         {
             return _context.Customers.ToList();
@@ -35,34 +41,49 @@ namespace TaskManagement.Services
 
         public void UpdateCustomer(string email, string name, string phoneNumber)
         {
+            // Clear any tracked entities to prevent conflicts
+            _context.ChangeTracker.Clear();
+            
             var customer = GetCustomerByEmail(email);
             if (customer == null)
                 throw new Exception("Customer not found.");
 
             customer.Name = name;
             customer.PhoneNumber = phoneNumber;
-            _context.Customers.Update(customer);
+            
+            // Explicitly mark as modified to ensure changes are saved
+            _context.Entry(customer).State = EntityState.Modified;
             _context.SaveChanges();
         }
 
         public void AddLoyaltyPoints(string email, int points)
         {
+            // Clear any tracked entities to prevent conflicts
+            _context.ChangeTracker.Clear();
+            
             var customer = GetCustomerByEmail(email);
             if (customer != null)
             {
                 customer.LoyaltyPoints += points;
-                _context.Customers.Update(customer);
+                
+                // Explicitly mark as modified to ensure changes are saved
+                _context.Entry(customer).State = EntityState.Modified;
                 _context.SaveChanges();
             }
         }
 
         public void DeactivateCustomer(string email)
         {
+            // Clear any tracked entities to prevent conflicts
+            _context.ChangeTracker.Clear();
+            
             var customer = GetCustomerByEmail(email);
             if (customer != null)
             {
                 customer.IsActive = false;
-                _context.Customers.Update(customer);
+                
+                // Explicitly mark as modified to ensure changes are saved
+                _context.Entry(customer).State = EntityState.Modified;
                 _context.SaveChanges();
             }
         }

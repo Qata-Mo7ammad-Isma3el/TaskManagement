@@ -1,4 +1,5 @@
-﻿using TaskManagement.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using TaskManagement.Data;
 using TaskManagement.Models;
 
 namespace TaskManagement.Services
@@ -44,30 +45,43 @@ namespace TaskManagement.Services
 
         public void UpdateProduct(string id, string name, string description, decimal price)
         {
+            // Clear any tracked entities to prevent conflicts
+            _context.ChangeTracker.Clear();
+            
             var product = GetProductById(id);
             if (product != null)
             {
                 product.Name = name;
                 product.Description = description;
                 product.Price = price;
-                _context.Products.Update(product);
+                
+                // Explicitly mark as modified
+                _context.Entry(product).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
                 _context.SaveChanges();
             }
         }
 
         public void DeactivateProduct(string id)
         {
+            // Clear any tracked entities to prevent conflicts
+            _context.ChangeTracker.Clear();
+            
             var product = GetProductById(id);
             if (product != null)
             {
                 product.IsActive = false;
                 product.UpdatedAt = DateTime.UtcNow;
-                _context.Products.Update(product);
+                
+                // Explicitly mark as modified
+                _context.Entry(product).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
                 _context.SaveChanges();
             }
         }
         public bool ReduceStock(string id, int quantity)
         {
+            // Clear any tracked entities to prevent conflicts
+            _context.ChangeTracker.Clear();
+            
             var product = GetProductById(id);
             if (product != null && quantity <= product.StockQuantity)
             {
@@ -79,7 +93,9 @@ namespace TaskManagement.Services
                 {
                     product.IsActive = false;
                 }
-                _context.Products.Update(product);             
+                
+                // Explicitly mark as modified
+                _context.Entry(product).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
                 _context.SaveChanges();
                 return true;
             }
@@ -88,12 +104,17 @@ namespace TaskManagement.Services
 
         public void IncreaseStock(string id, int quantity)
         {
+            // Clear any tracked entities to prevent conflicts
+            _context.ChangeTracker.Clear();
+            
             var product = GetProductById(id);
             if (product != null && quantity > 0)
             {
                 product.StockQuantity += quantity;
                 product.UpdatedAt = DateTime.UtcNow;
-                _context.Products.Update(product);
+                
+                // Explicitly mark as modified
+                _context.Entry(product).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
                 _context.SaveChanges();  
             }
         }

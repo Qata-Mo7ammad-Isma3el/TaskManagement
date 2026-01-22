@@ -1,18 +1,16 @@
-﻿using Microsoft.IdentityModel.Tokens;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using TaskManagement.Models;
+using System.Text;
 using TaskManagement.Services;
 
-namespace TaskManagement.UI
+namespace TaskManagement.UserUI
 {
-    public class OrderUI
+    public class UserOrderUI
     {
         private readonly CustomerService _customerService;
         private readonly ProductService _productService;
         private readonly OrderService _orderService;
-
-        public OrderUI(
+        public UserOrderUI(
             CustomerService customerService,
             ProductService productService,
             OrderService orderService)
@@ -21,41 +19,29 @@ namespace TaskManagement.UI
             _productService = productService;
             _orderService = orderService;
         }
-
-        public void Show()
+        public void Show(string email)
         {
-            bool back = false;
-
-            while (!back)
+            bool exit = false;
+            while (!exit)
             {
                 Console.Clear();
                 Console.WriteLine("=== ORDER MANAGEMENT ===");
                 Console.WriteLine("1. Place New Order");
-                Console.WriteLine("2. View Customer Orders");
-                Console.WriteLine("3. Update Order Status");
-                Console.WriteLine("4. Back to Main Menu");
+                Console.WriteLine("2. View My Orders");
+                Console.WriteLine("3. Back to Main Menu");
                 Console.Write("Select option: ");
-
                 var choice = Console.ReadLine();
-
                 switch (choice)
                 {
                     case "1":
-                        PlaceOrder();
+                        PlaceOrder(email);
                         break;
-
                     case "2":
-                        ViewCustomerOrders();
+                        ViewCustomerOrders(email);
                         break;
-
                     case "3":
-                        UpdateOrderStatus();
+                        exit = true;
                         break;
-
-                    case "4":
-                        back = true;
-                        break;
-
                     default:
                         Console.WriteLine("\n? Invalid option. Please try again.");
                         Console.WriteLine("Press any key to continue...");
@@ -64,14 +50,13 @@ namespace TaskManagement.UI
                 }
             }
         }
-
-        private void PlaceOrder()
+        private void PlaceOrder(string email)
         {
             Console.Clear();
             Console.WriteLine("=== PLACE NEW ORDER ===");
 
-            Console.Write("Customer Email: ");
-            var email = Console.ReadLine();
+            //Console.Write("Customer Email: ");
+            //var email = Console.ReadLine();
 
             var customer = _customerService.GetCustomerByEmail(email);
             if (customer == null)
@@ -98,7 +83,6 @@ namespace TaskManagement.UI
             while (adding)
             {
                 Console.Write("\nEnter product number (0 to finish): ");
-                
                 int productNum = Convert.ToInt32(Console.ReadLine());
                 bool IsValidProductNum = int.TryParse(productNum.ToString(), out productNum);
                 bool IsNullOrEmpty = string.IsNullOrEmpty(productNum.ToString());
@@ -159,14 +143,13 @@ namespace TaskManagement.UI
             Console.WriteLine("Press any key to continue...");
             Console.ReadKey();
         }
-
-        private void ViewCustomerOrders()
+        private void ViewCustomerOrders(string email)
         {
             Console.Clear();
             Console.WriteLine("=== VIEW CUSTOMER ORDERS ===");
 
-            Console.Write("Customer Email: ");
-            var email = Console.ReadLine();
+            //Console.Write("Customer Email: ");
+            //var email = Console.ReadLine();
 
             var orders = _orderService.GetCustomerOrders(email);
 
@@ -194,46 +177,6 @@ namespace TaskManagement.UI
                 }
 
                 Console.WriteLine(new string('-', 40));
-            }
-            Console.WriteLine("Press any key to continue...");
-            Console.ReadKey();
-        }
-
-        private void UpdateOrderStatus()
-        {
-            Console.Clear();
-            Console.WriteLine("=== UPDATE ORDER STATUS ===");
-
-            Console.Write("Order ID: ");
-            var orderId = Console.ReadLine();
-
-            Console.WriteLine("\n1. Pending");
-            Console.WriteLine("2. Processing");
-            Console.WriteLine("3. Shipped");
-            Console.WriteLine("4. Delivered");
-            Console.WriteLine("5. Cancelled");
-            Console.Write("Select status: ");
-
-            var choice = Console.ReadLine();
-
-            OrderStatus status = choice switch
-            {
-                "1" => OrderStatus.Pending,
-                "2" => OrderStatus.Processing,
-                "3" => OrderStatus.Shipped,
-                "4" => OrderStatus.Delivered,
-                "5" => OrderStatus.Cancelled,
-                _ => throw new Exception("Invalid status")
-            };
-
-            try
-            {
-                _orderService.UpdateOrderStatus(orderId, status);
-                Console.WriteLine($"✓ Status updated to {status}");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error: {ex.Message}");
             }
             Console.WriteLine("Press any key to continue...");
             Console.ReadKey();

@@ -1,6 +1,8 @@
 ﻿using System;
 using TaskManagement.Data;
 using TaskManagement.Services;
+using TaskManagement.UserUI;
+using TaskManagement.UserSession;
 
 namespace TaskManagement.UI
 {
@@ -9,6 +11,7 @@ namespace TaskManagement.UI
         private readonly CustomerService _customerService;
         private readonly ProductService _productService;
         private readonly OrderService _orderService;
+        private readonly  userSession _usersession;
         private readonly AppDbContext _context;
 
         public MainMenu(
@@ -55,6 +58,8 @@ namespace TaskManagement.UI
             }
         }
 
+        private bool isValid(string email, string password) => _customerService.LoginCheck(email, password);
+        private bool isAdmin(string email) => email.Split('@')[0].Contains("admin") || email.Split('@')[0].Contains("Admin");
         private void Login()
         {
             Console.Clear();
@@ -65,9 +70,11 @@ namespace TaskManagement.UI
 
             Console.Write("Password: ");
             var password = Console.ReadLine();
+            var usersession = new userSession(email); 
 
-            if (_customerService.LoginCheck(email, password))
+            if (isValid(email, password) && isAdmin(email))
             {
+                Console.ForegroundColor = ConsoleColor.Red;
                 new SystemMenu(
                     _customerService,
                     _productService,
@@ -75,9 +82,21 @@ namespace TaskManagement.UI
                     _context
                 ).Show();
             }
+            else if(isValid(email, password) && !isAdmin(email))
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                new UserSystemMenu(
+                    _customerService,
+                    _productService,
+                    _orderService,
+                    usersession,
+                    _context
+                ).Show();
+            }
             else
             {
                 Console.WriteLine("Invalid credentials.");
+                Console.WriteLine("Press any key to continue...");
                 Console.ReadKey();
             }
         }
@@ -98,24 +117,28 @@ namespace TaskManagement.UI
 
             Console.Write("Password: ");
             var password = Console.ReadLine();
+            var usersession = new userSession(email);
 
             try
             {
                 _customerService.CreateCustomer(name, email, phone, password);
 
                 Console.WriteLine("\nRegistration successful!");
+                Console.WriteLine("Press any key to continue...");
                 Console.ReadKey();
-
-                new SystemMenu(
+                Console.ForegroundColor = ConsoleColor.Green;
+                new UserSystemMenu(
                     _customerService,
                     _productService,
                     _orderService,
+                    usersession,
                     _context
                 ).Show();
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                Console.WriteLine("Press any key to continue...");
                 Console.ReadKey();
             }
         }

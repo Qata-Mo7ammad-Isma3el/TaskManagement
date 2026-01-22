@@ -15,6 +15,9 @@ namespace TaskManagement.Services
 
         public Order PlaceOrder(string customerEmail, Dictionary<string, int> cart)
         {
+            // Clear any tracked entities to prevent conflicts
+            _context.ChangeTracker.Clear();
+            
             var customer = _context.Customers.FirstOrDefault(c => c.Email == customerEmail);
             if (customer == null)
                 throw new Exception("Customer not found.");
@@ -57,7 +60,9 @@ namespace TaskManagement.Services
             // Add loyalty points (1 point per $10 spent)
             var pointsEarned = (int)(total / 10);
             customer.LoyaltyPoints += pointsEarned;
-            _context.Customers.Update(customer);
+            
+            // Explicitly mark customer as modified
+            _context.Entry(customer).State = EntityState.Modified;
             _context.SaveChanges();
 
             _context.Orders.Add(order);
@@ -83,10 +88,16 @@ namespace TaskManagement.Services
 
         public void UpdateOrderStatus(string orderId, OrderStatus status)
         {
+            // Clear any tracked entities to prevent conflicts
+            _context.ChangeTracker.Clear();
+            
             var order = _context.Orders.Find(orderId);
             if (order != null)
             {
                 order.Status = status;
+                
+                // Explicitly mark as modified
+                _context.Entry(order).State = EntityState.Modified;
                 _context.SaveChanges();
             }
         }

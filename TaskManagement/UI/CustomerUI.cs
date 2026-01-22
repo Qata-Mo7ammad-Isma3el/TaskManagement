@@ -51,6 +51,7 @@ namespace TaskManagement.UI
                         break;
                     default:
                         Console.WriteLine("\n? Invalid option. Please try again.");
+                        Console.WriteLine("Press any key to continue...");
                         Console.ReadKey();
                         break;
                 }
@@ -88,6 +89,7 @@ namespace TaskManagement.UI
             catch (Exception ex)
             {
                 Console.WriteLine($"\n? Error: {ex.Message}");
+                Console.WriteLine("Press any key to continue...");
                 Console.ReadKey();
             }
 
@@ -135,7 +137,7 @@ namespace TaskManagement.UI
             Console.Write("Customer Email: ");
             var email = Console.ReadLine();
 
-            var customer = _service.GetCustomerByEmail(email);
+            var customer = _service.GetCustomerByEmailNoTracking(email);
             if (customer == null)
             {
                 Console.WriteLine("\n? Customer not found!");
@@ -147,30 +149,45 @@ namespace TaskManagement.UI
             Console.WriteLine($"\nCurrent Name: {customer.Name}");
             Console.Write("New Name (press Enter to keep current): ");
             var newName = Console.ReadLine();
-            if (string.IsNullOrWhiteSpace(newName))
-                newName = customer.Name;
 
             Console.WriteLine($"Current Phone: {customer.PhoneNumber}");
             Console.Write("New Phone (press Enter to keep current): ");
             var newPhone = Console.ReadLine();
-            if (string.IsNullOrWhiteSpace(newPhone))
-                newPhone = customer.PhoneNumber;
 
-            try
+            if (string.IsNullOrWhiteSpace(newName) && string.IsNullOrWhiteSpace(newPhone))
             {
-                _service.UpdateCustomer(email, newName, newPhone);
-                Console.WriteLine("\n? Customer updated successfully!");
-                Console.WriteLine($"Name: {newName}");
-                Console.WriteLine($"Phone: {newPhone}");
-                Console.WriteLine("\nPress any key to return back...");
+                Console.WriteLine("\n? No changes made.");
+                Console.WriteLine("Press any key to continue...");
                 Console.ReadKey();
+                return;
             }
-            catch (Exception ex)
+            else if(!string.IsNullOrWhiteSpace(newName) && string.IsNullOrWhiteSpace(newPhone))
             {
-                Console.WriteLine($"\n? Error: {ex.Message}");
+                newPhone = customer.PhoneNumber;
             }
+            else if (string.IsNullOrWhiteSpace(newName) && !string.IsNullOrWhiteSpace(newPhone))
+            {
+                newName = customer.Name;
+            }
+            // else: both have values, use the entered values (newName and newPhone)
 
 
+
+                try
+                {
+                    _service.UpdateCustomer(email, newName, newPhone);
+                    Console.WriteLine("\n? Customer updated successfully!");
+                    Console.WriteLine($"Name: {newName}");
+                    Console.WriteLine($"Phone: {newPhone}");
+                    Console.WriteLine("\nPress any key to return back...");
+                    Console.ReadKey();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"\n? Error: {ex.Message}");
+                    Console.WriteLine("\nPress any key to return back...");
+                    Console.ReadKey();
+                }
         }
 
         private void AddLoyaltyPoints()
@@ -207,6 +224,7 @@ namespace TaskManagement.UI
                 catch (Exception ex)
                 {
                     Console.WriteLine($"\n? Error: {ex.Message}");
+                    Console.WriteLine("Press any key to continue...");
                     Console.ReadKey();
                 }
             }
@@ -261,12 +279,14 @@ namespace TaskManagement.UI
                 catch (Exception ex)
                 {
                     Console.WriteLine($"\n? Error: {ex.Message}");
+                    Console.WriteLine("Press any key to continue...");
                     Console.ReadKey();
                 }
             }
             else
             {
                 Console.WriteLine("\n? Deactivation cancelled.");
+                Console.WriteLine("Press any key to continue...");
                 Console.ReadKey();
             }
 

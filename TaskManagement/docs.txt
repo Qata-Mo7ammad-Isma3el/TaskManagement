@@ -1,0 +1,21 @@
+|Feature           IEnumerable   ICollection   IList
+----------------------------------------------------
+foreach                ✔             ✔           ✔
+Add / Remove           ✖             ✔           ✔
+Count                  ✖             ✔           ✔
+Index access           ✖             ✖           ✔
+Insert / RemoveAt      ✖             ✖           ✔
+
+
+
+dotnet add package Microsoft.EntityFrameworkCore.SqlServer
+dotnet add package Microsoft.EntityFrameworkCore.Design
+dotnet add package Microsoft.EntityFrameworkCore.Tools
+dotnet add package BCrypt.Net-Next
+
+
+to clean up the database tables
+-- DELETE FROM Orders;
+-- DELETE FROM Customers;
+-- DELETE FROM Products;
+-- delete from OrderItems;
